@@ -19,8 +19,8 @@ This Python script can perform **ping** and **traceroute** operations. It uses t
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/allenmonkey970/Ping-Traceroute-Tool.git
+   cd Ping-Traceroute-Tool
    ```
 
 2. Install the required dependencies:
