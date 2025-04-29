@@ -19,22 +19,26 @@ def resolve_hostname(target):
 def ping(target, count=4, timeout=1):
     """Ping a target using ICMP Echo Requests."""
     print(f"\nPinging {target} with {count} packets:")
+    success = False
     for i in range(count):
         try:
             packet = IP(dst=target) / ICMP()
             reply = sr1(packet, timeout=timeout, verbose=0)
             if reply:
+                success = True
                 rtt = (reply.time - packet.sent_time) * 1000
                 print(f"Reply from {reply.src}: time={rtt:.2f} ms")
             else:
                 print("Request timed out.")
         except Exception as e:
             print(f"Error during ping: {e}")
+    return success
 
 def traceroute(target, max_hops=30, timeout=1, save_to_file=False):
     """Perform a traceroute to the target."""
     print(f"\nTraceroute to {target}, max hops: {max_hops}")
     results = []
+    reached_target = False
     for ttl in range(1, max_hops + 1):
         try:
             packet = IP(dst=target, ttl=ttl) / ICMP()
@@ -48,6 +52,7 @@ def traceroute(target, max_hops=30, timeout=1, save_to_file=False):
                 results.append(f"{ttl}\t{reply.src} ({hostname})")
                 if reply.type == 0:  # ICMP Echo Reply
                     print("Reached target.")
+                    reached_target = True
                     break
             else:
                 print(f"{ttl}\t*")
@@ -63,6 +68,8 @@ def traceroute(target, max_hops=30, timeout=1, save_to_file=False):
             print("\nResults saved to 'traceroute_results.txt'.")
         except IOError as e:
             print(f"Error saving results to file: {e}")
+
+    return reached_target
 
 if __name__ == "__main__":
     try:
