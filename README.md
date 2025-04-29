@@ -1,4 +1,4 @@
-#ping-traceroute-tool
+# Ping-Traceroute-Tool
 
 This Python script can perform **ping** and **traceroute** operations. It uses the `scapy` library for network packet manipulation and includes features like DNS resolution, reverse DNS lookup, and saving traceroute results to a file.
 
