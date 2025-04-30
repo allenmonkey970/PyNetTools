@@ -1,69 +1,139 @@
-# Ping-Traceroute-Tool
+# PyNetTools
 
-This Python script can perform **ping** and **traceroute** operations. It uses the `scapy` library for network packet manipulation and includes features like DNS resolution, reverse DNS lookup, and saving traceroute results to a file.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.6+-green.svg)
+![Last Updated](https://img.shields.io/badge/last%20updated-2025--04--30-brightgreen)
 
-## Features
+A comprehensive network analysis and diagnostics toolkit built with Python. PyNetTools offers a suite of networking utilities including ping, traceroute, port scanning, OS detection, ping sweeping, and speed testing with both command-line and interactive interfaces.
 
-- Ping a target with customizable packet count and timeout.
-- Perform a traceroute to a target with reverse DNS lookup.
-- Resolve hostnames to IP addresses.
-- Save traceroute results to a file.
-- User input prompts.
+<img src="https://github.com/allenmonkey970/pynettools/blob/main/pynettools.png" alt="PyNetTools Banner" width="600" height="400"/>
 
-## Requirements
+## 🚀 Features
+
+- 📊 **Internet Speed Testing** - Measure your download/upload speeds and ping latency
+- 📡 **Ping & Traceroute** - Test connectivity and trace network paths with visualizations
+- 🔍 **Ping Sweep** - Discover active hosts on a network subnet
+- 🔒 **Port Scanning** - Identify open ports and services on target hosts
+- 💻 **OS Detection** - Determine the operating system of remote hosts
+- 📋 **Logging & Reporting** - Save all results to organized files for analysis
+
+## 📋 Requirements
 
 - Python 3.6 or higher
-- `scapy` library
+- Root/Administrator privileges (for some features)
 
-## Installation
+## ⚙️ Installation
 
-1. Clone this repository:
+1. Clone the repository:
    ```bash
-   git clone https://github.com/allenmonkey970/Ping-Traceroute-Tool.git
-   cd Ping-Traceroute-Tool
+   git clone https://github.com/allenmonkey970/pynettools.git
+   cd pynettools
    ```
 
-2. Install the required dependencies:
+2. Install the required packages:
    ```bash
    pip install -r requirements.txt
    ```
 
-## Usage
+## 🛠️ Usage
 
-Run the script and follow the prompts to perform ping or traceroute operations:
+### Interactive Mode
+
+Run the tool without any arguments to use the interactive menu:
 
 ```bash
-python main.py
+python network_tool.py
 ```
 
-### Example
+This will present a menu with all available options:
+```
+Network Tool Menu:
+1. Perform Speed Test
+2. Ping a Target
+3. Traceroute to a Target
+4. Ping Sweep
+5. Port Scan
+6. OS Scan
+7. Exit
+```
 
-1. Enter the target IP or hostname:
-   ```
-   Enter the target IP or hostname: 8.8.8.8
-   ```
+### Command Line Usage
 
-2. Specify the number of ping packets:
-   ```
-   Enter the number of ping packets (default: 4): 5
-   ```
+#### Speed Test
+```bash
+python network_tool.py speedtest
+```
 
-3. Specify the maximum hops for traceroute:
-   ```
-   Enter the maximum hops for traceroute (default: 30): 20
-   ```
+#### Ping a Target
+```bash
+python network_tool.py ping example.com -c 5 -t 2
+```
+- `-c, --count`: Number of packets to send (default: 4)
+- `-t, --timeout`: Timeout in seconds for each packet (default: 1)
 
-4. Save traceroute results to a file:
-   ```
-   Save traceroute results to file? (yes/no): yes
-   ```
+#### Traceroute
+```bash
+python network_tool.py traceroute example.com -m 30 -t 1 -s
+```
+- `-m, --max-hops`: Maximum hops (default: 30)
+- `-t, --timeout`: Timeout in seconds for each probe (default: 1)
+- `-s, --save`: Save results to file
 
-## Output
+#### Ping Sweep
+```bash
+python network_tool.py sweep 192.168.1.0/24 -t 1 --threads 20
+```
+- `-t, --timeout`: Timeout in seconds (default: 1)
+- `--threads`: Number of threads (default: 10)
 
-- **Ping**: Displays the round-trip time (RTT) for each packet.
-- **Traceroute**: Shows each hop's IP address and hostname (if available).
-- **File Output**: Saves traceroute results to `traceroute_results.txt` if enabled.
+#### Port Scan
+```bash
+python network_tool.py portscan example.com -p 1-1024
+```
+- `-p, --ports`: Port range (e.g., 1-1024 or 22,80,443)
 
-## License
+#### OS Scan
+```bash
+python network_tool.py osscan example.com
+```
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+## ⚙️ Configuration
+
+You can customize default settings by creating a `config.json` file in the root directory:
+
+```json
+{
+  "timeout": 1,
+  "max_hops": 30,
+  "threads": 10,
+  "default_ports": "1-1024"
+}
+```
+
+## 📁 Results
+
+All results are saved in the `results` directory:
+- Speed test results: `speedtest_results.json`
+- Traceroute results: `traceroute_[target].txt`
+- Ping sweep results: `ping_sweep_[subnet].txt`
+- Port scan results: `portscan_[target].txt`
+- OS scan results: `osscan_[target].txt`
+- Log file: `network_tool.log`
+
+## ⚠️ Disclaimer
+
+This tool is for network diagnostics and educational purposes only. Always ensure you have proper authorization before scanning networks that you don't own or have explicit permission to test.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👨‍💻 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/allenmonkey970/pynettools/issues).
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
