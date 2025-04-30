@@ -1,0 +1,3 @@
+scapy
+speedtest-cli
+python-nmap
