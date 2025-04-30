@@ -1,5 +1,5 @@
 import unittest
-from main import resolve_hostname, ping, traceroute
+from main import resolve_hostname, ping, traceroute, speed_test
 
 class TestPingTracerouteTool(unittest.TestCase):
 
@@ -30,8 +30,14 @@ class TestPingTracerouteTool(unittest.TestCase):
 
     def test_traceroute_unreachable(self):
         # Test traceroute to an unreachable target
-        result = traceroute("10.255.255.1", max_hops=5)
+        result = traceroute("10.255.255.1.2", max_hops=5)
         self.assertFalse(result, "Traceroute to an unreachable target should fail.")
+
+    def test_speed_test(self):
+        try:
+            speed_test()  # Perform an actual speed test
+        except Exception as e:
+            self.fail(f"speed_test raised an exception: {e}")
 
 if __name__ == "__main__":
     unittest.main()
