@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3.6+-green.svg)
 ![Last Updated](https://img.shields.io/badge/last%20updated-2025--04--30-brightgreen)
 
-A comprehensive network analysis and diagnostics toolkit built with Python. PyNetTools offers a suite of networking utilities including ping, traceroute, port scanning, OS detection, ping sweeping, and speed testing with both command-line and interactive interfaces.
+A network analysis and diagnostics toolkit built with Python. PyNetTools offers a suite of networking utilities, including ping, traceroute, port scanning, OS detection, ping sweeping, and speed testing with both command-line and interactive interfaces.
 
 <img src="https://github.com/allenmonkey970/pynettools/blob/main/pynettools.png" alt="PyNetTools Banner" width="600" height="400"/>
 
@@ -15,6 +15,7 @@ A comprehensive network analysis and diagnostics toolkit built with Python. PyNe
 - 🔍 **Ping Sweep** - Discover active hosts on a network subnet
 - 🔒 **Port Scanning** - Identify open ports and services on target hosts
 - 💻 **OS Detection** - Determine the operating system of remote hosts
+- 📈 **Results Visualization** - View traceroute paths with network graphs
 - 📋 **Logging & Reporting** - Save all results to organized files for analysis
 
 ## 📋 Requirements
@@ -114,7 +115,7 @@ You can customize default settings by creating a `config.json` file in the root 
 
 All results are saved in the `results` directory:
 - Speed test results: `speedtest_results.json`
-- Traceroute results: `traceroute_[target].txt`
+- Traceroute results: `traceroute_[target].txt and traceroute_[target].png (visualization)`
 - Ping sweep results: `ping_sweep_[subnet].txt`
 - Port scan results: `portscan_[target].txt`
 - OS scan results: `osscan_[target].txt`
