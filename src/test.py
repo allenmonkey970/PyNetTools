@@ -1,5 +1,8 @@
 import unittest
-from main import resolve_hostname, ping, traceroute, speed_test
+from unittest.mock import patch
+
+from src.main import resolve_hostname, ping, traceroute, speed_test, port_scan, os_scan
+
 
 class TestPingTracerouteTool(unittest.TestCase):
 
@@ -38,6 +41,22 @@ class TestPingTracerouteTool(unittest.TestCase):
             speed_test()  # Perform an actual speed test
         except Exception as e:
             self.fail(f"speed_test raised an exception: {e}")
+
+    @patch("src.main.nmap.PortScanner.scan")
+    def test_os_scan(self, mock_scan):
+        mock_scan.return_value = None  # Simulate a successful scan
+        try:
+            os_scan("8.8.8.8")
+        except Exception as e:
+            self.fail(f"os_scan raised an exception: {e}")
+
+    @patch("src.main.nmap.PortScanner.scan")
+    def test_port_scan(self, mock_scan):
+        mock_scan.return_value = None  # Simulate a successful scan
+        try:
+            port_scan("8.8.8.8", ports="22-80")
+        except Exception as e:
+            self.fail(f"port_scan raised an exception: {e}")
 
 if __name__ == "__main__":
     unittest.main()
