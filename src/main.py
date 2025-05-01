@@ -33,7 +33,6 @@ try:
     # Optional visualization imports
     import matplotlib.pyplot as plt
     import networkx as nx
-
     visualization_available = True
 except ImportError:
     visualization_available = False
@@ -180,7 +179,7 @@ class NetworkTool:
         results = []
         reached_target = False
 
-        with tqdm(total=max_hops, desc="Tracing route") as pbar:
+        with tqdm.tqdm(total=max_hops, desc="Tracing route") as pbar:
             for ttl in range(1, max_hops + 1):
                 try:
                     packet = IP(dst=target, ttl=ttl) / ICMP()

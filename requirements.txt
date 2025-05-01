@@ -2,3 +2,5 @@ scapy
 speedtest-cli
 python-nmap
 tqdm
+networkx
+matplotlib
