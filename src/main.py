@@ -7,7 +7,6 @@ import threading
 import ipaddress
 import concurrent.futures
 import argparse
-from tqdm import tqdm
 
 try:
     from scapy.all import IP, ICMP, sr1, conf
@@ -23,6 +22,11 @@ try:
     import nmap
 except ImportError:
     print("Error: python-nmap is not installed. Install it using 'pip install python-nmap'.")
+    sys.exit(1)
+try:
+    import tqdm
+except ImportError:
+    print("Error: tqdm is not installed. Install it using 'pip install tqdm'.")
     sys.exit(1)
 
 try:
@@ -296,7 +300,6 @@ class NetworkTool:
         open_ports = []
         try:
             print("Scanning ports (this may take some time)...")
-            # Remove the callback parameter
             nm.scan(hosts=target, ports=ports, arguments="-sS")
 
             for host in nm.all_hosts():
