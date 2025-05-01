@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.6+-green.svg)
-![Last Updated](https://img.shields.io/badge/last%20updated-2025--04--30-brightgreen)
+![Last Updated](https://img.shields.io/badge/last%20updated-2025--05--01-brightgreen)
 
 A network analysis and diagnostics toolkit built with Python. PyNetTools offers a suite of networking utilities, including ping, traceroute, port scanning, OS detection, ping sweeping, and speed testing with both command-line and interactive interfaces.
 
