@@ -2,51 +2,59 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.6+-green.svg)
-![Last Updated](https://img.shields.io/badge/last%20updated-2025--05--01-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
 
-A network analysis and diagnostics toolkit built with Python. PyNetTools offers a suite of networking utilities, including ping, traceroute, port scanning, OS detection, ping sweeping, and speed testing with both command-line and interactive interfaces.
+A network analysis and diagnostics toolkit built with Python. PyNetTools provides a suite of utilities — ping, traceroute, ping sweep, port scanning, OS detection, and speed testing — via both an interactive menu and a full command-line interface.
 
-<img src="https://github.com/allenmonkey970/pynettools/blob/main/pynettools.png" alt="PyNetTools Banner" width="600" height="400"/>
+<img src="pynettools.png" alt="PyNetTools Banner" width="600"/>
 
-## 🚀 Features
+---
 
-- 📊 **Internet Speed Testing** - Measure your download/upload speeds and ping latency
-- 📡 **Ping & Traceroute** - Test connectivity and trace network paths with visualizations
-- 🔍 **Ping Sweep** - Discover active hosts on a network subnet
-- 🔒 **Port Scanning** - Identify open ports and services on target hosts
-- 💻 **OS Detection** - Determine the operating system of remote hosts
-- 📈 **Results Visualization** - View traceroute paths with network graphs
-- 📋 **Logging & Reporting** - Save all results to organized files for analysis
+## Features
 
-## 📋 Requirements
+| Feature | Description |
+|---|---|
+| **Speed Test** | Measure download/upload speeds and ping latency |
+| **Ping** | Send ICMP echo requests to any host |
+| **Traceroute** | Trace the network path with hop-by-hop details and a visual graph |
+| **Ping Sweep** | Discover active hosts across a subnet |
+| **Port Scan** | Identify open ports and services via Nmap |
+| **OS Detection** | Fingerprint the operating system of a remote host |
 
-- Python 3.6 or higher
-- Root/Administrator privileges (for some features)
+---
 
-## ⚙️ Installation
+## Requirements
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/allenmonkey970/pynettools.git
-   cd pynettools
-   ```
+- Python 3.6+
+- Administrator / root privileges (required for raw socket features: ping, traceroute, sweep)
+- **Windows:** [Npcap](https://npcap.com) — required by Scapy for raw packet capture. During install, enable **"WinPcap API-compatible mode"**.
+- **Linux/macOS:** `libpcap` (usually pre-installed; install via `sudo apt install libpcap-dev` or `brew install libpcap` if missing)
 
-2. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-## 🛠️ Usage
-
-### Interactive Mode
-
-Run the tool without any arguments to use the interactive menu:
+## Installation
 
 ```bash
-python network_tool.py
+# 1. Clone the repository
+git clone https://github.com/allenmonkey970/pynettools.git
+cd pynettools
+
+# 2. (Windows only) Install Npcap from https://npcap.com/#download
+
+# 3. Install Python dependencies
+pip install -r requirements.txt
 ```
 
-This will present a menu with all available options:
+---
+
+## Usage
+
+### Interactive mode
+
+```bash
+python main.py
+```
+
 ```
 Network Tool Menu:
 1. Perform Speed Test
@@ -58,49 +66,59 @@ Network Tool Menu:
 7. Exit
 ```
 
-### Command Line Usage
+### Command-line interface
 
-#### Speed Test
+#### Speed test
 ```bash
-python network_tool.py speedtest
+python main.py speedtest
 ```
 
-#### Ping a Target
+#### Ping
 ```bash
-python network_tool.py ping example.com -c 5 -t 2
+python main.py ping <target> [-c COUNT] [-t TIMEOUT]
 ```
-- `-c, --count`: Number of packets to send (default: 4)
-- `-t, --timeout`: Timeout in seconds for each packet (default: 1)
+| Flag | Default | Description |
+|---|---|---|
+| `-c`, `--count` | `4` | Number of packets to send |
+| `-t`, `--timeout` | `1` | Per-packet timeout (seconds) |
 
 #### Traceroute
 ```bash
-python network_tool.py traceroute example.com -m 30 -t 1 -s
+python main.py traceroute <target> [-m MAX_HOPS] [-t TIMEOUT] [-s]
 ```
-- `-m, --max-hops`: Maximum hops (default: 30)
-- `-t, --timeout`: Timeout in seconds for each probe (default: 1)
-- `-s, --save`: Save results to file
+| Flag | Default | Description |
+|---|---|---|
+| `-m`, `--max-hops` | `30` | Maximum number of hops |
+| `-t`, `--timeout` | `1` | Per-probe timeout (seconds) |
+| `-s`, `--save` | — | Save results to `results/` |
 
-#### Ping Sweep
+#### Ping sweep
 ```bash
-python network_tool.py sweep 192.168.1.0/24 -t 1 --threads 20
+python main.py sweep <subnet> [-t TIMEOUT] [--threads N]
 ```
-- `-t, --timeout`: Timeout in seconds (default: 1)
-- `--threads`: Number of threads (default: 10)
+| Flag | Default | Description |
+|---|---|---|
+| `-t`, `--timeout` | `1` | Per-host timeout (seconds) |
+| `--threads` | `10` | Concurrent threads |
 
-#### Port Scan
+#### Port scan
 ```bash
-python network_tool.py portscan example.com -p 1-1024
+python main.py portscan <target> [-p PORTS]
 ```
-- `-p, --ports`: Port range (e.g., 1-1024 or 22,80,443)
+| Flag | Default | Description |
+|---|---|---|
+| `-p`, `--ports` | `1-1024` | Port range (e.g. `1-1024` or `22,80,443`) |
 
-#### OS Scan
+#### OS detection
 ```bash
-python network_tool.py osscan example.com
+python main.py osscan <target>
 ```
 
-## ⚙️ Configuration
+---
 
-You can customize default settings by creating a `config.json` file in the root directory:
+## Configuration
+
+Create a `config.json` in the project root to override defaults:
 
 ```json
 {
@@ -111,30 +129,73 @@ You can customize default settings by creating a `config.json` file in the root 
 }
 ```
 
-## 📁 Results
+---
 
-All results are saved in the `results` directory:
-- Speed test results: `speedtest_results.json`
-- Traceroute results: `traceroute_[target].txt and traceroute_[target].png (visualization)`
-- Ping sweep results: `ping_sweep_[subnet].txt`
-- Port scan results: `portscan_[target].txt`
-- OS scan results: `osscan_[target].txt`
-- Log file: `network_tool.log`
+## Results
 
-## ⚠️ Disclaimer
+All output is saved to the `results/` directory (created automatically, excluded from version control):
 
-This tool is for network diagnostics and educational purposes only. Always ensure you have proper authorization before scanning networks that you don't own or have explicit permission to test.
+| File | Contents |
+|---|---|
+| `speedtest_results.json` | Download/upload speeds and latency |
+| `traceroute_<target>.txt` | Hop-by-hop traceroute output |
+| `traceroute_<target>.png` | Traceroute network graph |
+| `ping_sweep_<subnet>.txt` | List of live hosts |
+| `portscan_<target>.txt` | Open ports and services |
+| `osscan_<target>.txt` | OS detection matches |
+| `network_tool.log` | Full session log |
 
-## 📜 License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Screenshots
 
-## 👨‍💻 Contributing
+### Speed Test
+![Speed Test](screenshots/speedtest.png)
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/allenmonkey970/pynettools/issues).
+### Traceroute
+![Traceroute](screenshots/traceroute.png)
+
+### Traceroute Visualization
+![Traceroute Visualization](screenshots/traceroute_viz.png)
+
+---
+
+## Project Structure
+
+```
+PyNetTools/
+├── pynettools/
+│   ├── __init__.py
+│   ├── network_tool.py   # NetworkTool class
+│   └── subnets.py        # Subnet utilities
+├── screenshots/          # README screenshots
+├── results/              # Runtime output (gitignored)
+├── main.py               # Entry point
+├── config.json           # Optional configuration
+├── requirements.txt
+└── LICENSE
+```
+
+---
+
+## Disclaimer
+
+This tool is intended for network diagnostics and educational purposes only. Always ensure you have explicit authorization before scanning networks or hosts you do not own.
+
+---
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome. Check the [issues page](https://github.com/allenmonkey970/pynettools/issues).
 
 1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
 5. Open a Pull Request

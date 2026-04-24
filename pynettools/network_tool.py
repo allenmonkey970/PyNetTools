@@ -24,31 +24,29 @@ except ImportError:
     print("Error: python-nmap is not installed. Install it using 'pip install python-nmap'.")
     sys.exit(1)
 try:
-    import tqdm
+    from tqdm import tqdm
 except ImportError:
     print("Error: tqdm is not installed. Install it using 'pip install tqdm'.")
     sys.exit(1)
 
 try:
-    # Optional visualization imports
     import matplotlib.pyplot as plt
     import networkx as nx
     visualization_available = True
 except ImportError:
     visualization_available = False
 
+RESULTS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "results")
+
 
 class NetworkTool:
     def __init__(self):
-        self.results_dir = "results"
-        os.makedirs(self.results_dir, exist_ok=True)
+        os.makedirs(RESULTS_DIR, exist_ok=True)
+        self.results_dir = RESULTS_DIR
         self.config = self.load_config()
         self.logger = self.setup_logging()
 
-        # Check for admin privileges
         try:
-            conf.use_pcap = True
-            # Test if we have necessary permissions
             test_packet = IP(dst="127.0.0.1") / ICMP()
             sr1(test_packet, timeout=0.1, verbose=0)
         except Exception:
@@ -56,26 +54,22 @@ class NetworkTool:
             print("Warning: Some features require administrator/root privileges")
 
     def load_config(self):
-        """Load configuration from config.json if exists."""
-        config_file = "config.json"
+        config_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.json")
         default_config = {
             "timeout": 1,
             "max_hops": 30,
             "threads": 10,
             "default_ports": "1-1024"
         }
-
         if os.path.exists(config_file):
             try:
                 with open(config_file, 'r') as f:
                     return json.load(f)
             except json.JSONDecodeError:
                 print("Error in config file. Using defaults.")
-
         return default_config
 
     def setup_logging(self):
-        """Setup logging to file and console."""
         log_file = os.path.join(self.results_dir, "network_tool.log")
         logging.basicConfig(
             level=logging.INFO,
@@ -88,7 +82,6 @@ class NetworkTool:
         return logging.getLogger('network_tool')
 
     def resolve_hostname(self, target):
-        """Resolve hostname to IP address."""
         try:
             return socket.gethostbyname(target)
         except socket.gaierror:
@@ -97,7 +90,6 @@ class NetworkTool:
             return None
 
     def ping(self, target, count=4, timeout=1):
-        """Ping a target using ICMP Echo Requests."""
         self.logger.info(f"Pinging {target} with {count} packets")
         print(f"\nPinging {target} with {count} packets:")
         success = False
@@ -117,7 +109,6 @@ class NetworkTool:
         return success
 
     def ping_sweep(self, subnet, timeout=1, threads=10):
-        """Perform a ping sweep on a given subnet using multiple threads."""
         self.logger.info(f"Performing ping sweep on subnet: {subnet}")
         print(f"\nPerforming ping sweep on subnet: {subnet}")
         live_hosts = []
@@ -160,7 +151,6 @@ class NetworkTool:
         else:
             print("\nNo live hosts found.")
 
-        # Save results to file
         result_file = os.path.join(self.results_dir, f"ping_sweep_{subnet.replace('/', '_')}.txt")
         try:
             with open(result_file, "w") as file:
@@ -173,13 +163,12 @@ class NetworkTool:
         return live_hosts
 
     def traceroute(self, target, max_hops=30, timeout=1, save_to_file=False):
-        """Perform a traceroute to the target."""
         self.logger.info(f"Traceroute to {target}, max hops: {max_hops}")
         print(f"\nTraceroute to {target}, max hops: {max_hops}")
         results = []
         reached_target = False
 
-        with tqdm.tqdm(total=max_hops, desc="Tracing route") as pbar:
+        with tqdm(total=max_hops, desc="Tracing route") as pbar:
             for ttl in range(1, max_hops + 1):
                 try:
                     packet = IP(dst=target, ttl=ttl) / ICMP()
@@ -191,7 +180,7 @@ class NetworkTool:
                             hostname = "Unknown"
                         print(f"{ttl}\t{reply.src} ({hostname})")
                         results.append(f"{ttl}\t{reply.src} ({hostname})")
-                        if reply.type == 0:  # ICMP Echo Reply
+                        if reply.type == 0:
                             print("Reached target.")
                             reached_target = True
                             break
@@ -214,14 +203,12 @@ class NetworkTool:
                 self.logger.error(f"Error saving results to file: {e}")
                 print(f"Error saving results to file: {e}")
 
-        # Generate visualization if available
         if visualization_available and len(results) > 0:
             self.visualize_traceroute(results, target)
 
         return reached_target
 
     def visualize_traceroute(self, results, target):
-        """Create a visual representation of traceroute results."""
         if not visualization_available:
             return
 
@@ -232,14 +219,12 @@ class NetworkTool:
             if "*" not in hop:
                 parts = hop.split('\t')
                 if len(parts) >= 2:
-                    hop_num = parts[0]
                     ip = parts[1].split()[0]
                     G.add_edge(prev_node, ip)
                     prev_node = ip
 
         plt.figure(figsize=(10, 8))
-        nx.draw(G, with_labels=True, node_color='lightblue',
-                node_size=1500, arrows=True)
+        nx.draw(G, with_labels=True, node_color='lightblue', node_size=1500, arrows=True)
         plt.title(f"Traceroute to {target}")
 
         viz_file = os.path.join(self.results_dir, f"traceroute_{target}.png")
@@ -247,7 +232,6 @@ class NetworkTool:
         print(f"Traceroute visualization saved to {viz_file}")
 
     def speed_test(self):
-        """Perform a speed test on your current internet connection."""
         self.logger.info("Starting speed test")
         print("\nStarting speed test...")
         try:
@@ -255,17 +239,16 @@ class NetworkTool:
             st.get_best_server()
 
             print("Testing download speed...")
-            download_speed = st.download() / 1000000  # Convert to Mbps
+            download_speed = st.download() / 1000000
             print(f"Download Speed: {download_speed:.2f} Mbps")
 
             print("Testing upload speed...")
-            upload_speed = st.upload() / 1000000  # Convert to Mbps
+            upload_speed = st.upload() / 1000000
             print(f"Upload Speed: {upload_speed:.2f} Mbps")
 
             ping_latency = st.results.ping
             print(f"Ping Latency: {ping_latency:.2f} ms")
 
-            # Save results to file
             result_file = os.path.join(self.results_dir, "speedtest_results.json")
             with open(result_file, "w") as f:
                 json.dump({
@@ -284,18 +267,9 @@ class NetworkTool:
             return None
 
     def port_scan(self, target, ports="1-1024"):
-        """Perform a port scan on the target."""
         self.logger.info(f"Performing port scan on {target} (ports: {ports})")
         print(f"\nPerforming port scan on {target} (ports: {ports})")
         nm = nmap.PortScanner()
-
-        # Parse port range for progress bar
-        if "-" in ports:
-            start, end = map(int, ports.split("-"))
-            total_ports = end - start + 1
-        else:
-            total_ports = len(ports.split(","))
-
         open_ports = []
         try:
             print("Scanning ports (this may take some time)...")
@@ -306,15 +280,14 @@ class NetworkTool:
                 print(f"State: {nm[host].state()}")
                 for proto in nm[host].all_protocols():
                     print(f"Protocol: {proto}")
-                    ports = nm[host][proto].keys()
-                    for port in sorted(ports):
+                    port_list = nm[host][proto].keys()
+                    for port in sorted(port_list):
                         state = nm[host][proto][port]["state"]
                         service = nm[host][proto][port]["name"]
                         print(f"Port: {port}\tState: {state}\tService: {service}")
                         if state == "open":
                             open_ports.append((port, service))
 
-            # Save results to file
             result_file = os.path.join(self.results_dir, f"portscan_{target}.txt")
             try:
                 with open(result_file, "w") as file:
@@ -330,7 +303,6 @@ class NetworkTool:
             print(f"Error during port scan: {e}")
 
     def os_scan(self, target):
-        """Perform an OS scan on the target."""
         self.logger.info(f"Performing OS scan on {target}")
         print(f"\nPerforming OS scan on {target}")
         nm = nmap.PortScanner()
@@ -341,13 +313,11 @@ class NetworkTool:
                 print(f"Host: {host} ({nm[host].hostname() if nm[host].hostname() else 'Unknown'})")
                 print(f"State: {nm[host].state()}")
 
-                # Save results to file
                 result_file = os.path.join(self.results_dir, f"osscan_{target}.txt")
                 try:
                     with open(result_file, "w") as file:
                         file.write(f"OS scan results for {target}\n")
                         file.write("-" * 40 + "\n")
-
                         if "osmatch" in nm[host]:
                             print("OS Matches:")
                             for os_match in nm[host]["osmatch"]:
@@ -356,7 +326,6 @@ class NetworkTool:
                         else:
                             print("No OS information available.")
                             file.write("No OS information available.\n")
-
                     print(f"\nResults saved to '{result_file}'.")
                 except IOError as e:
                     self.logger.error(f"Error saving results to file: {e}")
@@ -366,55 +335,40 @@ class NetworkTool:
             print(f"Error during OS scan: {e}")
 
     def parse_args(self):
-        """Parse command line arguments."""
-        parser = argparse.ArgumentParser(description="Network Tool")
+        parser = argparse.ArgumentParser(
+            description="PyNetTools — Network analysis and diagnostics toolkit",
+            formatter_class=argparse.RawDescriptionHelpFormatter
+        )
         subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
-        # Speed test parser
-        subparsers.add_parser("speedtest", help="Run a speed test")
+        subparsers.add_parser("speedtest", help="Run an internet speed test")
 
-        # Ping parser
         ping_parser = subparsers.add_parser("ping", help="Ping a target")
         ping_parser.add_argument("target", help="Target IP or hostname")
-        ping_parser.add_argument("-c", "--count", type=int, default=4, help="Number of packets")
-        ping_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout in seconds")
+        ping_parser.add_argument("-c", "--count", type=int, default=4, help="Number of packets (default: 4)")
+        ping_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout per packet in seconds (default: 1)")
 
-        # Traceroute parser
-        tracert_parser = subparsers.add_parser("traceroute", help="Perform a traceroute")
+        tracert_parser = subparsers.add_parser("traceroute", help="Trace the route to a target")
         tracert_parser.add_argument("target", help="Target IP or hostname")
-        tracert_parser.add_argument("-m", "--max-hops", type=int, default=30, help="Maximum hops")
-        tracert_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout in seconds")
+        tracert_parser.add_argument("-m", "--max-hops", type=int, default=30, help="Maximum hops (default: 30)")
+        tracert_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout per probe in seconds (default: 1)")
         tracert_parser.add_argument("-s", "--save", action="store_true", help="Save results to file")
 
-        # Ping sweep parser
-        sweep_parser = subparsers.add_parser("sweep", help="Perform a ping sweep")
-        sweep_parser.add_argument("subnet", help="Subnet to scan (e.g., 192.168.1.0/24)")
-        sweep_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout in seconds")
-        sweep_parser.add_argument("--threads", type=int, default=10, help="Number of threads")
+        sweep_parser = subparsers.add_parser("sweep", help="Ping sweep a subnet")
+        sweep_parser.add_argument("subnet", help="Subnet in CIDR notation (e.g. 192.168.1.0/24)")
+        sweep_parser.add_argument("-t", "--timeout", type=float, default=1, help="Timeout per host in seconds (default: 1)")
+        sweep_parser.add_argument("--threads", type=int, default=10, help="Number of threads (default: 10)")
 
-        # Port scan parser
-        portscan_parser = subparsers.add_parser("portscan", help="Perform a port scan")
+        portscan_parser = subparsers.add_parser("portscan", help="Scan ports on a target")
         portscan_parser.add_argument("target", help="Target IP or hostname")
-        portscan_parser.add_argument("-p", "--ports", default="1-1024", help="Port range (e.g., 1-1024 or 22,80,443)")
+        portscan_parser.add_argument("-p", "--ports", default="1-1024", help="Port range (default: 1-1024)")
 
-        # OS scan parser
-        osscan_parser = subparsers.add_parser("osscan", help="Perform an OS scan")
+        osscan_parser = subparsers.add_parser("osscan", help="Detect the OS of a target")
         osscan_parser.add_argument("target", help="Target IP or hostname")
 
         return parser.parse_args()
 
-    def get_validated_input(self, prompt, validator=None, default=None):
-        """Get validated user input with an optional default value."""
-        while True:
-            value = input(f"{prompt}{f' (default: {default})' if default else ''}: ").strip()
-            if not value and default is not None:
-                return default
-            if not validator or validator(value):
-                return value
-            print("Invalid input. Please try again.")
-
     def run(self):
-        """Run the network tool with command line arguments or interactive menu."""
         if len(sys.argv) > 1:
             args = self.parse_args()
             if args.command == "speedtest":
@@ -441,7 +395,6 @@ class NetworkTool:
             self.interactive_menu()
 
     def interactive_menu(self):
-        """Run the interactive menu."""
         try:
             while True:
                 print("\nNetwork Tool Menu:")
@@ -461,28 +414,24 @@ class NetworkTool:
                     resolved_target = self.resolve_hostname(target)
                     if not resolved_target:
                         continue
-
                     try:
                         count = int(input("Enter the number of ping packets (default: 4): ") or 4)
                         timeout = float(input("Enter the timeout for each request in seconds (default: 1): ") or 1)
                     except ValueError:
                         print("Error: Invalid input. Please enter numeric values.")
                         continue
-
                     self.ping(resolved_target, count, timeout)
                 elif choice == "3":
                     target = input("Enter the target IP or hostname: ")
                     resolved_target = self.resolve_hostname(target)
                     if not resolved_target:
                         continue
-
                     try:
                         max_hops = int(input("Enter the maximum hops for traceroute (default: 30): ") or 30)
                         timeout = float(input("Enter the timeout for each request in seconds (default: 1): ") or 1)
                     except ValueError:
                         print("Error: Invalid input. Please enter numeric values.")
                         continue
-
                     save_to_file = input("Save traceroute results to file? (yes/no): ").strip().lower() == "yes"
                     self.traceroute(resolved_target, max_hops, timeout, save_to_file)
                 elif choice == "4":
@@ -493,14 +442,12 @@ class NetworkTool:
                     except ValueError:
                         print("Error: Invalid input. Please enter numeric values.")
                         continue
-
                     self.ping_sweep(subnet, timeout, threads)
                 elif choice == "5":
                     target = input("Enter the target IP or hostname: ")
                     resolved_target = self.resolve_hostname(target)
                     if not resolved_target:
                         continue
-
                     ports = input("Enter the port range (default: 1-1024): ").strip() or "1-1024"
                     self.port_scan(resolved_target, ports)
                 elif choice == "6":
@@ -508,7 +455,6 @@ class NetworkTool:
                     resolved_target = self.resolve_hostname(target)
                     if not resolved_target:
                         continue
-
                     self.os_scan(resolved_target)
                 elif choice == "7":
                     print("Exiting. Goodbye!")
@@ -521,8 +467,3 @@ class NetworkTool:
         except Exception as e:
             self.logger.error(f"An unexpected error occurred: {e}")
             print(f"An unexpected error occurred: {e}")
-
-
-if __name__ == "__main__":
-    tool = NetworkTool()
-    tool.run()
